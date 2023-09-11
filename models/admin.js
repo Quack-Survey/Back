@@ -17,8 +17,8 @@ adminSchema.statics.create = function (payload) {
   return adminData.save();
 };
 
-adminSchema.statics.findAll = function () {
-  return this.find({});
+adminSchema.statics.findAll = function (payload) {
+  return this.find(payload);
 };
 
 module.exports = mongoose.model("Admin", adminSchema);

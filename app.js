@@ -20,5 +20,8 @@ mongoose
   .catch((e) => console.error(e));
 
 app.use("/api", require("./routes/api"));
+app.use("/admin", require("./routes/admin"));
+app.use("/template", require("./routes/template"));
+app.use("/form", require("./routes/form"));
 
 app.listen(port, () => console.log(`Server listening on port ${port}`));
