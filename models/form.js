@@ -22,8 +22,8 @@ const formShema = new mongoose.Schema(
 );
 
 formShema.statics.create = function (payload) {
-  const templateData = new this(payload);
-  return templateData.save();
+  const formData = new this(payload);
+  return formData.save();
 };
 
 formShema.statics.findAll = function (payload) {

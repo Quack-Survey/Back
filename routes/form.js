@@ -1,7 +1,7 @@
 const router = require("express").Router();
 
 const form = require("../models/form");
-// const admin = require("../models/admin");
+
 router.get("/", async (req, res) => {
   try {
     const newForm = await form.fidAll({
