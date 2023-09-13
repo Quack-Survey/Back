@@ -1,17 +1,17 @@
 const router = require("express").Router();
-const admin = require("../models/admin");
+const user = require("../models/user");
 
 router.get("/", async (req, res) => {
   try {
-    const newAdmin = await admin.create({
+    const newUser = await user.create({
       username: "Hun5LEE",
       email: "test@test.com",
       password: "testpassword",
     });
-    res.status(201).json(newAdmin);
+    res.status(201).json(newUser);
   } catch (err) {
-    console.error("Error creating admin:", err);
-    res.status(500).json({ error: "Failed to create admin" });
+    console.error("Error creating user:", err);
+    res.status(500).json({ error: "Failed to create user" });
   }
 });
 

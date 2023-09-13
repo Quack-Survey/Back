@@ -1,14 +1,12 @@
 const mongoose = require("mongoose");
 
-const Admin = mongoose.model("Admin");
-
 const templateShema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     targetNumber: { type: Number, required: true },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: Admin,
+      ref: "User",
       required: true,
     },
     bookMark: { type: Boolean, default: false },
@@ -32,8 +30,8 @@ templateShema.static.updateOne = function (payload) {
   return this.updateOne(payload);
 };
 
-templateShema.static.deleteMany = function (payload) {
-  return this.deleteMany(payload);
+templateShema.static.deleteOne = function (payload) {
+  return this.deleteOne(payload);
 };
 
 module.exports = mongoose.model("Template", templateShema);

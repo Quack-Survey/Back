@@ -1,13 +1,11 @@
 const mongoose = require("mongoose");
 
-const Form = mongoose.model("Form");
-
 const templateOptionShema = new mongoose.Schema(
   {
     quater: { type: Array, required: true },
     formId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: Form,
+      ref: "Form",
       required: true,
     },
   },

@@ -1,14 +1,12 @@
 const mongoose = require("mongoose");
 
-const Form = mongoose.model("Form");
-
 const logicShema = new mongoose.Schema(
   {
     type: { type: String, required: true },
     selector: { type: Array, required: true },
     formId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: Form,
+      ref: "Form",
       required: true,
     },
   },

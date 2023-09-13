@@ -1,7 +1,5 @@
 const mongoose = require("mongoose");
 
-const Template = mongoose.model("Template");
-
 const formShema = new mongoose.Schema(
   {
     title: { type: String, required: true },
@@ -12,7 +10,7 @@ const formShema = new mongoose.Schema(
     bookMark: { type: Boolean, default: false },
     templateId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: Template,
+      ref: "Template",
       required: true,
     },
   },
@@ -32,6 +30,10 @@ formShema.statics.findAll = function (payload) {
 
 formShema.static.updateOne = function (payload) {
   return this.updateOne(payload);
+};
+
+formShema.static.updateMany = function (payload) {
+  return this.updateMany(payload);
 };
 
 formShema.static.deleteMany = function (payload) {
