@@ -5,7 +5,10 @@ const form = require("../models/form");
 router.get("/", async (req, res) => {
   try {
     const newForm = await form.findAll({
-      templateId: "64fc5ce18de6354509f7104e",
+      title: "테스트 폼",
+      type: "text",
+      order: 1,
+      templateId: "65029a6e13cf637226a2b976",
     });
     res.status(201).json(newForm);
   } catch (err) {
