@@ -1,6 +1,6 @@
 const router = require("express").Router();
 
-router.use("/user", require("./user"));
+router.use("/users", require("./user"));
 router.use("/form", require("./form"));
 router.use("/formContent", require("./formContent"));
 router.use("/template", require("./template"));
