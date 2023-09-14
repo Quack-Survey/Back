@@ -13,9 +13,9 @@ const userSchema = new mongoose.Schema(
 );
 
 userSchema.statics.create = function (payload) {
-  const adminData = new this(payload);
+  const userData = new this(payload);
 
-  return adminData.save();
+  return userData.save();
 };
 
 userSchema.statics.findAll = function () {
