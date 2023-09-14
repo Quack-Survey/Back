@@ -9,6 +9,11 @@ const logicShema = new mongoose.Schema(
       ref: "Form",
       required: true,
     },
+    templateId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Template",
+      required: true,
+    },
   },
   {
     timestamps: true,
