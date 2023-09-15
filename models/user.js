@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema(
   {
     username: { type: String, required: true },
-    email: { type: String, required: true, uinque: true, index: true },
+    email: { type: String, required: true, uinque: true },
     hashedPassword: { type: String, required: true },
     salt: { type: String, required: true },
   },
@@ -22,12 +22,20 @@ userSchema.statics.findAll = function () {
   return this.find();
 };
 
-userSchema.statics.findOne = function (email) {
+userSchema.statics.findOneByEmail = function (email) {
   return this.find({ email });
 };
 
-userSchema.statics.deleteByUserid = function (Userid) {
-  return this.deleteMany({ _id: Userid });
+userSchema.statics.findOneByUserid = function (userid) {
+  return this.find({ _id: userid });
+};
+
+userSchema.statics.updateByUserid = function (userid, payload) {
+  return this.updateOne({ _id: userid }, payload);
+};
+
+userSchema.statics.deleteByUserid = function (userid) {
+  return this.deleteMany({ _id: userid });
 };
 
 module.exports = mongoose.model("User", userSchema);
