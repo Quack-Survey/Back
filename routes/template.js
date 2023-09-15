@@ -8,12 +8,41 @@ const logic = require("../models/logic");
 
 router.get("/", async (req, res) => {
   try {
-    // 쿼리값이 넘어와야함.
     const templateData = await template.findAll({
       userId: req.query.userId,
     });
 
     res.status(200).json(templateData);
+  } catch (err) {
+    console.error("Error getting template:", err);
+    res.status(500).json({ error: "Failed to get template" });
+  }
+});
+
+router.get("/properties", async (req, res) => {
+  try {
+    const formData = await form.findAll({
+      templateId: req.query.templateId,
+    });
+
+    const formContentData = await formContent.findAll({
+      templateId: req.query.templateId,
+    });
+
+    const templateOptionData = await templateOption.findAll({
+      templateId: req.query.templateId,
+    });
+
+    const logicData = await logic.findAll({
+      templateId: req.query.templateId,
+    });
+
+    res.status(200).json({
+      form: formData,
+      formContent: formContentData,
+      templateOption: templateOptionData,
+      logic: logicData,
+    });
   } catch (err) {
     console.error("Error getting template:", err);
     res.status(500).json({ error: "Failed to get template" });
