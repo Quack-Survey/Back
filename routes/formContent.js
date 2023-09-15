@@ -4,11 +4,11 @@ const formContent = require("../models/formContent");
 
 router.get("/", async (req, res) => {
   try {
-    const newFormContent = await formContent.findAll({});
-    res.status(200).json(newFormContent);
+    const formContentData = await formContent.findAll({});
+    res.status(200).json(formContentData);
   } catch (err) {
-    console.error("Error creating formContent:", err);
-    res.status(500).json({ error: "Failed to create formContent" });
+    console.error("Error getting formContent:", err);
+    res.status(500).json({ error: "Failed to get formContent" });
   }
 });
 

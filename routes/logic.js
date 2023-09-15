@@ -4,15 +4,11 @@ const logic = require("../models/logic");
 
 router.get("/", async (req, res) => {
   try {
-    const newLogic = await logic.create({
-      type: "filter",
-      selector: ["1번문항"],
-      formId: "64fe9fcf2bb64b13a4f2191e",
-    });
-    res.status(201).json(newLogic);
+    const logicData = await logic.findAll({});
+    res.status(200).json(logicData);
   } catch (err) {
-    console.error("Error creating logic:", err);
-    res.status(500).json({ error: "Failed to create logic" });
+    console.error("Error getting logic:", err);
+    res.status(500).json({ error: "Failed to get logic" });
   }
 });
 

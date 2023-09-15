@@ -4,14 +4,11 @@ const templateOption = require("../models/templateOption");
 
 router.get("/", async (req, res) => {
   try {
-    const newTemplateOption = await templateOption.create({
-      quater: ["옵션1"],
-      formId: "64fe9fcf2bb64b13a4f2191e",
-    });
-    res.status(201).json(newTemplateOption);
+    const templateOptionData = await templateOption.findAll({});
+    res.status(200).json(templateOptionData);
   } catch (err) {
-    console.error("Error creating templateOption:", err);
-    res.status(500).json({ error: "Failed to create templateOption" });
+    console.error("Error getting templateOption:", err);
+    res.status(500).json({ error: "Failed to get templateOption" });
   }
 });
 
