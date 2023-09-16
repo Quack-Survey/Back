@@ -39,4 +39,8 @@ formShema.static.deleteMany = function (payload) {
   return this.deleteMany(payload);
 };
 
+formShema.static.deleteOne = function (payload) {
+  return this.deleteOne(payload);
+};
+
 module.exports = mongoose.model("Form", formShema);

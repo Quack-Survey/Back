@@ -51,15 +51,15 @@ router.get("/properties", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    await template.create(req.body);
-    res.status(201);
+    const newTemplate = await template.create(req.body);
+    res.status(201).json(newTemplate);
   } catch (err) {
     console.error("Error creating template:", err);
     res.status(500).json({ error: "Failed to create template" });
   }
 });
 
-router.put("/", async (req, res) => {
+router.put("/properties", async (req, res) => {
   try {
     await template.updateOne({ _id: req.body.template._id }, req.body.template);
 
@@ -104,7 +104,7 @@ router.put("/", async (req, res) => {
   }
 });
 
-router.delete("/", async (req, res) => {
+router.delete("/properties", async (req, res) => {
   try {
     await Promise.all(
       req.body.map(async (templateId) => {
