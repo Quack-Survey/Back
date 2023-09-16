@@ -37,4 +37,8 @@ logicShema.static.deleteMany = function (payload) {
   return this.deleteMany(payload);
 };
 
+logicShema.static.deleteOne = function (payload) {
+  return this.deleteOne(payload);
+};
+
 module.exports = mongoose.model("Logic", logicShema);

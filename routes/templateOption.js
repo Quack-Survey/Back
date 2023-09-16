@@ -24,10 +24,10 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.patch("/", async (req, res) => {
+router.put("/", async (req, res) => {
   try {
     await templateOption.updateOne(
-      { templateId: req.query.templateId },
+      { _id: req.query.templateOptionId },
       req.body,
     );
     res.status(200).json(true);
@@ -39,7 +39,7 @@ router.patch("/", async (req, res) => {
 
 router.delete("/", async (req, res) => {
   try {
-    await templateOption.delete(req.body);
+    await templateOption.deleteOne({ _id: req.query.templateOptionId });
     res.status(200).json(true);
   } catch (err) {
     console.error("Error deleting templateOption:", err);

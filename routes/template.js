@@ -109,10 +109,10 @@ router.delete("/", async (req, res) => {
     await Promise.all(
       req.body.map(async (templateId) => {
         await template.deleteOne({ _id: templateId });
-        await form.deleteMany({ templateId });
-        await formContent.deleteMany({ templateId });
-        await templateOption.deleteMany({ templateId });
-        await logic.deleteMany({ templateId });
+        await form.deleteMany({ templateId: templateId });
+        await formContent.deleteMany({ templateId: templateId });
+        await templateOption.deleteOne({ templateId: templateId });
+        await logic.deleteMany({ templateId: templateId });
       }),
     );
     res.status(200).json(true);

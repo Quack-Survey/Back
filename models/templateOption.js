@@ -32,8 +32,8 @@ templateOptionShema.static.updateOne = function (payload) {
   return this.updateOne(payload);
 };
 
-templateOptionShema.static.deleteMany = function (payload) {
-  return this.deleteMany(payload);
+templateOptionShema.static.deleteOne = function (payload) {
+  return this.deleteOne(payload);
 };
 
 module.exports = mongoose.model("TemplateOption", templateOptionShema);
