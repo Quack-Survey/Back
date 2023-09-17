@@ -25,7 +25,9 @@ router
       }
     } catch (err) {
       console.error(err);
-      res.status(500).send(err);
+      res
+        .status(500)
+        .json({ state: false, message: "Cannot get all completes" });
     }
   })
   .post(async (req, res) => {
@@ -37,7 +39,7 @@ router
       res.status(201).json(complete);
     } catch (err) {
       console.error(err);
-      res.status(500).send(err);
+      res.status(500).json({ state: false, message: "Cannot create complete" });
     }
   });
 
@@ -50,7 +52,7 @@ router
       res.json(complete);
     } catch (err) {
       console.error(err);
-      res.status(500).send(err);
+      res.status(500).json({ state: false, message: "Cannot get complete" });
     }
   })
   .patch(async (req, res) => {
@@ -65,7 +67,10 @@ router
       res.status(201).json(complete);
     } catch (err) {
       console.error(err);
-      res.status(500).send(err);
+      res.status(500).json({
+        state: false,
+        message: "Cannot update complete. Please check your responses",
+      });
     }
   })
   .delete(async (req, res) => {
@@ -75,7 +80,7 @@ router
       res.json(complete);
     } catch (err) {
       console.error(err);
-      res.status(500).send(err);
+      res.status(500).json({ state: false, message: "Cannot delete complete" });
     }
   });
 
