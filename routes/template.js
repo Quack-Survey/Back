@@ -8,7 +8,6 @@ const logic = require("../models/logic");
 
 router.get("/", async (req, res) => {
   try {
-    // 쿼리값이 넘어와야함.
     const templateData = await template.findAll({
       userId: req.query.userId,
     });
@@ -20,17 +19,47 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/properties", async (req, res) => {
+  try {
+    const formData = await form.findAll({
+      templateId: req.query.templateId,
+    });
+
+    const formContentData = await formContent.findAll({
+      templateId: req.query.templateId,
+    });
+
+    const templateOptionData = await templateOption.findAll({
+      templateId: req.query.templateId,
+    });
+
+    const logicData = await logic.findAll({
+      templateId: req.query.templateId,
+    });
+
+    res.status(200).json({
+      form: formData,
+      formContent: formContentData,
+      templateOption: templateOptionData,
+      logic: logicData,
+    });
+  } catch (err) {
+    console.error("Error getting template:", err);
+    res.status(500).json({ error: "Failed to get template" });
+  }
+});
+
 router.post("/", async (req, res) => {
   try {
-    await template.create(req.body);
-    res.status(201);
+    const newTemplate = await template.create(req.body);
+    res.status(201).json(newTemplate);
   } catch (err) {
     console.error("Error creating template:", err);
     res.status(500).json({ error: "Failed to create template" });
   }
 });
 
-router.put("/", async (req, res) => {
+router.put("/properties", async (req, res) => {
   try {
     await template.updateOne({ _id: req.body.template._id }, req.body.template);
 
@@ -75,15 +104,15 @@ router.put("/", async (req, res) => {
   }
 });
 
-router.delete("/", async (req, res) => {
+router.delete("/properties", async (req, res) => {
   try {
     await Promise.all(
       req.body.map(async (templateId) => {
         await template.deleteOne({ _id: templateId });
-        await form.deleteMany({ templateId });
-        await formContent.deleteMany({ templateId });
-        await templateOption.deleteMany({ templateId });
-        await logic.deleteMany({ templateId });
+        await form.deleteMany({ templateId: templateId });
+        await formContent.deleteMany({ templateId: templateId });
+        await templateOption.deleteOne({ templateId: templateId });
+        await logic.deleteMany({ templateId: templateId });
       }),
     );
     res.status(200).json(true);
