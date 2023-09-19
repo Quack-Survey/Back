@@ -24,16 +24,21 @@ templateOptionShema.statics.create = function (payload) {
   return templateOptionData.save();
 };
 
-templateOptionShema.statics.findAll = function (payload) {
-  return this.find(payload);
+templateOptionShema.statics.findAll = function (templateId) {
+  return this.find({ templateId });
 };
 
-templateOptionShema.static.updateOne = function (payload) {
-  return this.updateOne(payload);
+templateOptionShema.statics.updateOneBytemplateOptionId = function (
+  templateOptionId,
+  updateInfo,
+) {
+  return this.updateOne({ _id: templateOptionId }, updateInfo);
 };
 
-templateOptionShema.static.deleteOne = function (payload) {
-  return this.deleteOne(payload);
+templateOptionShema.statics.deleteOneBytemplateOptionId = function (
+  templateOptionId,
+) {
+  return this.deleteOne({ _id: templateOptionId });
 };
 
 module.exports = mongoose.model("TemplateOption", templateOptionShema);
