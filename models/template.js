@@ -26,11 +26,11 @@ templateShema.statics.findAll = function (payload) {
   return this.find(payload);
 };
 
-templateShema.static.updateOne = function (payload) {
-  return this.updateOne(payload);
+templateShema.statics.updateOneByTemplateId = function (id, payload) {
+  return this.updateOne(id, payload);
 };
 
-templateShema.static.deleteOne = function (payload) {
+templateShema.statics.deleteOne = function (payload) {
   return this.deleteOne(payload);
 };
 

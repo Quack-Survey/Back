@@ -5,11 +5,13 @@ const form = require("../models/form");
 const formContent = require("../models/formContent");
 const templateOption = require("../models/templateOption");
 const logic = require("../models/logic");
+const { checkAuthorization } = require("../lib/middleware/checkAuthorization");
 
-router.get("/", async (req, res) => {
+router.get("/", checkAuthorization, async (req, res) => {
   try {
+    console.log(req.body.userid);
     const templateData = await template.findAll({
-      userId: req.query.userId,
+      userId: req.body.userid,
     });
 
     res.status(200).json(templateData);
@@ -20,7 +22,11 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/properties", async (req, res) => {
+  const { templateId } = req.query;
+
   try {
+    if (!templateId) throw new Error("No TemplateId");
+
     const formData = await form.findAll({
       templateId: req.query.templateId,
     });
@@ -45,10 +51,11 @@ router.get("/properties", async (req, res) => {
     });
   } catch (err) {
     console.error("Error getting template:", err);
-    res.status(500).json({ error: "Failed to get template" });
+    res.status(500).json(err.message);
   }
 });
 
+//userid 수정
 router.post("/", async (req, res) => {
   try {
     const newTemplate = await template.create(req.body);
@@ -59,9 +66,13 @@ router.post("/", async (req, res) => {
   }
 });
 
+//userid 수정
 router.put("/properties", async (req, res) => {
   try {
-    await template.updateOne({ _id: req.body.template._id }, req.body.template);
+    const data = await template.updateOneByTemplateId(
+      { _id: req.body.template._id },
+      req.body.template,
+    );
 
     if (req.body.forms) {
       await Promise.all(
@@ -97,13 +108,14 @@ router.put("/properties", async (req, res) => {
       );
     }
 
-    res.status(200).json(true);
+    res.status(200).json(data);
   } catch (err) {
     console.error("Error updating template:", err);
     res.status(500).json({ error: "Failed to update template" });
   }
 });
 
+//유저인증 템플릿 유저인증
 router.delete("/properties", async (req, res) => {
   try {
     await Promise.all(

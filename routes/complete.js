@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const checkAuthorization = require("../lib/middleware/checkAuthorization");
+const { checkAuthorization } = require("../lib/middleware/checkAuthorization");
 const Complete = require("../models/complete");
 const Template = require("../models/template");
 require("../models/template");
