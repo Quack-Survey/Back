@@ -22,16 +22,26 @@ templateShema.statics.create = function (payload) {
   return templateData.save();
 };
 
-templateShema.statics.findAll = function (payload) {
-  return this.find(payload);
+templateShema.statics.findAllByUserId = function (userId) {
+  return this.find({ userId });
 };
 
-templateShema.statics.updateOneByTemplateId = function (id, payload) {
-  return this.updateOne(id, payload);
+templateShema.statics.findAllByTemplateId = function (templateId) {
+  return this.find({ _id: templateId });
 };
 
-templateShema.statics.deleteOne = function (payload) {
-  return this.deleteOne(payload);
+templateShema.statics.updateOneByTemplateId = function (
+  templateId,
+  updateInfo,
+) {
+  return this.updateOne(
+    { _id: templateId },
+    { ...updateInfo, updatedAt: new Date() },
+  );
+};
+
+templateShema.statics.deleteOneByTemplateId = function (templateId) {
+  return this.deleteOne({ _id: templateId });
 };
 
 module.exports = mongoose.model("Template", templateShema);

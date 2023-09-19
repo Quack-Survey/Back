@@ -25,22 +25,23 @@ formContentShema.statics.create = function (payload) {
   return formContentData.save();
 };
 
-formContentShema.statics.findAll = function (formId) {
+formContentShema.statics.findAllByFormId = function (formId) {
   return this.find({ formId });
 };
 
-formContentShema.statics.updateOneByFormContentId = function (
-  formId,
-  updateInfo,
-) {
-  return this.updateOne({ formId }, updateInfo);
+formContentShema.statics.findAllByTemplateId = function (templateId) {
+  return this.find({ templateId });
 };
 
-formContentShema.statics.deleteManyByFormContentId = function (payload) {
-  return this.deleteMany(payload);
+formContentShema.statics.updateOneByFormId = function (formId, updateInfo) {
+  return this.updateOne({ formId }, { ...updateInfo, updatedAt: new Date() });
 };
 
-formContentShema.statics.deleteOneByFormContentId = function (formId) {
+formContentShema.statics.deleteManyByTemplateId = function (templateId) {
+  return this.deleteMany({ templateId });
+};
+
+formContentShema.statics.deleteOneByFormId = function (formId) {
   return this.deleteOne({ formId });
 };
 

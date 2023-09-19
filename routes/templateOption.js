@@ -8,7 +8,8 @@ router.get("/", async (req, res) => {
   try {
     if (!templateId) throw new Error("Have No TemplateId");
 
-    const templateOptionData = await templateOption.findAll(templateId);
+    const templateOptionData =
+      await templateOption.findAllByTemplateId(templateId);
     res.status(200).json(templateOptionData);
   } catch (err) {
     console.error("Error getting templateOption:", err);
@@ -20,7 +21,8 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    if (!req.body) throw new Error("Have No Body");
+    if (!req.body || !req.body.quater.length === 0)
+      throw new Error("Have No Body");
 
     await templateOption.create(req.body);
     res.status(201).json(true);

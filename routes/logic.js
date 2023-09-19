@@ -8,7 +8,7 @@ router.get("/", async (req, res) => {
   try {
     if (!templateId) throw new Error("Have No TemplateId");
 
-    const logicData = await logic.findAll(templateId);
+    const logicData = await logic.findAllByTemplateId(templateId);
     res.status(200).json(logicData);
   } catch (err) {
     console.error("Error getting logic:", err);
@@ -18,7 +18,8 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    if (!req.body) throw new Error("Have No Body");
+    if (!req.body || !req.body.selector.length === 0)
+      throw new Error("Have No Body");
 
     await logic.create(req.body);
     res.status(201).json(true);

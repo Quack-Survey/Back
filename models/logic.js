@@ -20,21 +20,24 @@ const logicShema = new mongoose.Schema(
   },
 );
 
-logicShema.statics.create = function (logicInfo) {
-  const logicData = new this(logicInfo);
+logicShema.statics.create = function (payload) {
+  const logicData = new this(payload);
   return logicData.save();
 };
 
-logicShema.statics.findAll = function (templateId) {
+logicShema.statics.findAllByTemplateId = function (templateId) {
   return this.find({ templateId });
 };
 
 logicShema.statics.updateOneByLogicId = function (logicId, updateInfo) {
-  return this.updateOne({ _id: logicId }, updateInfo);
+  return this.updateOne(
+    { _id: logicId },
+    { ...updateInfo, updatedAt: new Date() },
+  );
 };
 
-logicShema.statics.deleteManyByLogicId = function (payload) {
-  return this.deleteMany(payload);
+logicShema.statics.deleteManyByTemplateId = function (templateId) {
+  return this.deleteMany({ templateId });
 };
 
 logicShema.statics.deleteOneByLogicId = function (logicId) {

@@ -24,7 +24,7 @@ templateOptionShema.statics.create = function (payload) {
   return templateOptionData.save();
 };
 
-templateOptionShema.statics.findAll = function (templateId) {
+templateOptionShema.statics.findAllByTemplateId = function (templateId) {
   return this.find({ templateId });
 };
 
@@ -32,13 +32,30 @@ templateOptionShema.statics.updateOneBytemplateOptionId = function (
   templateOptionId,
   updateInfo,
 ) {
-  return this.updateOne({ _id: templateOptionId }, updateInfo);
+  return this.updateOne(
+    { _id: templateOptionId },
+    { ...updateInfo, updatedAt: new Date() },
+  );
+};
+
+templateOptionShema.statics.updateOneBytemplateId = function (
+  templateId,
+  updateInfo,
+) {
+  return this.updateOne(
+    { templateId },
+    { ...updateInfo, updatedAt: new Date() },
+  );
 };
 
 templateOptionShema.statics.deleteOneBytemplateOptionId = function (
   templateOptionId,
 ) {
   return this.deleteOne({ _id: templateOptionId });
+};
+
+templateOptionShema.statics.deleteOneBytemplateId = function (templateId) {
+  return this.deleteOne({ templateId });
 };
 
 module.exports = mongoose.model("TemplateOption", templateOptionShema);

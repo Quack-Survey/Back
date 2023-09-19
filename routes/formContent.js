@@ -8,7 +8,7 @@ router.get("/", async (req, res) => {
   try {
     if (!formId) throw new Error("Have No formId");
 
-    const formContentData = await formContent.findAll(formId);
+    const formContentData = await formContent.findAllByFormId(formId);
     res.status(200).json(formContentData);
   } catch (err) {
     console.error("Error getting formContent:", err);
@@ -38,7 +38,7 @@ router.put("/", async (req, res) => {
   try {
     if (!formId || !req.body) throw new Error("Have No Query || Body");
 
-    await formContent.updateOneByFormContentId(formId, req.body);
+    await formContent.updateOneByFormId(formId, req.body);
     res.status(200).json(true);
   } catch (err) {
     console.error("Error updating formContent:", err);
@@ -54,7 +54,7 @@ router.delete("/", async (req, res) => {
   try {
     if (!formId) throw new Error("Have No formId");
 
-    await formContent.deleteOneByFormContentId(formId);
+    await formContent.deleteOneByFormId(formId);
     res.status(200).json(true);
   } catch (err) {
     console.error("Error deleting formContent:", err);
