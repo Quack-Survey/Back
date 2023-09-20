@@ -11,12 +11,12 @@ router
   .get(checkAuthorization, async (req, res) => {
     try {
       const { templateId } = req.query;
-      const { userid } = req.body;
+      const { userId } = req.body;
       if (templateId) {
         const template = await Template.findById(templateId);
         const targetUserId = template.userId + "";
-        if (targetUserId !== userid + "") {
-          throw new Error("userid doesn't match");
+        if (targetUserId !== userId + "") {
+          throw new Error("userId doesn't match");
         }
         const id = new mongo.ObjectID(templateId);
         const completes = await Complete.findAllWithOptions({ templateId: id });
@@ -47,10 +47,10 @@ router
 
 router.route("/user").get(checkAuthorization, async (req, res) => {
   try {
-    const { userid } = req.body;
-    if (userid) {
+    const { userId } = req.body;
+    if (userId) {
       const bookmarkedTemplates = await Template.find({
-        userId: userid,
+        userId: userId,
         bookMark: true,
       });
       const completes = await Promise.all(
@@ -62,7 +62,7 @@ router.route("/user").get(checkAuthorization, async (req, res) => {
       );
       res.json(completes.map((arr) => (arr.length === 0 ? [null] : arr)));
     }
-    if (!userid) {
+    if (!userId) {
       res.status(400).json({ message: "User id does not exist" });
     }
   } catch (err) {
