@@ -1,10 +1,11 @@
 const router = require("express").Router();
 const users = require("../models/user");
 const { encryptPassword, verifyPassword } = require("../lib/utils/encryptUtil");
-const { checkEmail } = require("../lib/middleware/checkEmail");
+const { checkUserData } = require("../lib/middleware/checkUserData");
 const { generateToken } = require("../lib/utils/jwtUtil");
 const { checkAuthorization } = require("../lib/middleware/checkAuthorization");
 const { cookieOptions } = require("../lib/config/cookieConfig");
+const { createNickname, getUserData } = require("../lib/utils/usersUtils");
 
 router.get("/", checkAuthorization, async (req, res) => {
   try {
@@ -16,55 +17,47 @@ router.get("/", checkAuthorization, async (req, res) => {
   }
 });
 
-router.post("/signup", checkEmail, async (req, res) => {
+router.post("/signup", checkUserData, async (req, res) => {
   const { email, password, username } = req.body;
-  const { hashedPassword, salt } = await encryptPassword(password);
+  const encryptedPassword = await encryptPassword(password);
 
   try {
+    const data = await users.findOneByEmail(email);
+
+    if (data.length) throw new Error("Email already exists.");
+
     await users.create({
       email,
-      hashedPassword,
-      salt,
-      username,
+      username: username || createNickname(),
+      ...encryptedPassword,
     });
 
     res.status(201).json({ state: true, message: "Request Success." });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ state: false, message: "unknown error." });
+    res.status(400).json({ state: false, message: err.message });
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", checkUserData, async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const targetData = (await users.findOneByEmail(email))[0];
-    const verifyState = await verifyPassword(
-      password,
-      targetData.salt,
-      targetData.hashedPassword,
+    const userData = await getUserData(email, password);
+
+    const { accessToken, refreshToken } = await generateToken(
+      {
+        email: userData.email,
+        username: userData.username,
+      },
+      false,
     );
 
-    if (verifyState) {
-      const payload = {
-        email: targetData.email,
-        username: targetData.username,
-      };
-
-      const { accessToken, refreshToken } = await generateToken(payload, false);
-
-      res
-        .cookie("accessToken", accessToken, cookieOptions)
-        .cookie("refreshToken", refreshToken, cookieOptions)
-        .json({ state: true, message: "Login success." });
-    } else {
-      res
-        .status(500)
-        .json({ state: false, message: "Password does not match." });
-    }
+    res
+      .cookie("accessToken", accessToken, cookieOptions)
+      .cookie("refreshToken", refreshToken, cookieOptions)
+      .json({ state: true, message: "Login success." });
   } catch (err) {
-    res.status(500).json({ state: false, message: "Email does not match." });
+    res.status(400).json({ state: false, message: err.message });
   }
 });
 
@@ -76,37 +69,34 @@ router.get("/logout", async (req, res) => {
     .json({ state: true, message: "Logout success." });
 });
 
-router.patch("/password", checkAuthorization, async (req, res) => {
-  const { password, newPassword, userid } = req.body;
+router.patch(
+  "/password",
+  checkAuthorization,
+  checkUserData,
+  async (req, res) => {
+    const { password, newPassword, userId, hashedPassword, salt } = req.body;
 
-  try {
-    const targetData = (await users.findOneByUserid(userid))[0];
-    const verifyState = await verifyPassword(
-      password,
-      targetData.salt,
-      targetData.hashedPassword,
-    );
+    try {
+      const verifyState = await verifyPassword(password, salt, hashedPassword);
 
-    if (verifyState) {
-      const { hashedPassword, salt } = await encryptPassword(newPassword);
-      await users.updateByUserid(userid, { hashedPassword, salt });
+      if (!verifyState) throw new Error("Password does not match.");
+
+      const encryptedPassword = await encryptPassword(newPassword);
+
+      await users.updateByUserId(userId, encryptedPassword);
 
       res.json({ state: true, message: "Password change success." });
-    } else {
-      res
-        .status(500)
-        .json({ state: false, message: "Password does not match." });
+    } catch (err) {
+      res.status(400).json({ state: false, message: err.message });
     }
-  } catch (err) {
-    res.status(403).json({ state: false, message: "No permission." });
-  }
-});
+  },
+);
 
 router.patch("/username", checkAuthorization, async (req, res) => {
-  const { username, userid } = req.body;
+  const { username, userId } = req.body;
 
   try {
-    await users.updateByUserid(userid, { username });
+    await users.updateByUserId(userId, { username });
 
     res.json({ state: true, message: "Username change success." });
   } catch (err) {
@@ -115,12 +105,12 @@ router.patch("/username", checkAuthorization, async (req, res) => {
 });
 
 router.delete("/", checkAuthorization, async (req, res) => {
-  const { userid } = req.body;
+  const { userId } = req.body;
 
   try {
-    await users.deleteByUserid(userid);
+    await users.deleteByUserId(userId);
 
-    // userid가 참조된 모든 컬렉션 삭제 로직 추가
+    // userId가 참조된 모든 컬렉션 삭제 로직 추가
     // 가장 마지막에 추가 될 예정
 
     res.json({ state: true, message: "User Signout success." });
