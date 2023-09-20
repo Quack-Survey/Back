@@ -1,17 +1,25 @@
 const express = require("express");
 const router = express.Router();
-const checkAuthorization = require("../lib/middleware/checkAuthorization");
+const { checkAuthorization } = require("../lib/middleware/checkAuthorization");
 const Complete = require("../models/complete");
 const Template = require("../models/template");
+const { mongo } = require("mongoose");
 require("../models/template");
 
 router
   .route("")
-  .get(async (req, res) => {
+  .get(checkAuthorization, async (req, res) => {
     try {
       const { templateId } = req.query;
+      const { userid } = req.body;
       if (templateId) {
-        const completes = await Complete.find({ templateId });
+        const template = await Template.findById(templateId);
+        const targetUserId = template.userId + "";
+        if (targetUserId !== userid + "") {
+          throw new Error("userid doesn't match");
+        }
+        const id = new mongo.ObjectID(templateId);
+        const completes = await Complete.findAllWithOptions({ templateId: id });
         res.json(completes);
       }
       if (!templateId) {
@@ -41,12 +49,16 @@ router.route("/user").get(checkAuthorization, async (req, res) => {
   try {
     const { userid } = req.body;
     if (userid) {
-      const templatesId = await Template.find({ userId: userid }, "_id");
+      const bookmarkedTemplates = await Template.find({
+        userId: userid,
+        bookMark: true,
+      });
       const completes = await Promise.all(
-        templatesId.map(
-          async ({ _id }) =>
-            await Complete.find({ templateId: _id }).populate("templateId"),
-        ),
+        bookmarkedTemplates.map(async ({ _id }) => {
+          return await Complete.findAllWithOptions({
+            templateId: _id,
+          });
+        }),
       );
       res.json(completes.map((arr) => (arr.length === 0 ? [null] : arr)));
     }
@@ -66,7 +78,7 @@ router
   .get(async (req, res) => {
     try {
       const { id } = req.params;
-      const complete = await Complete.findById(id);
+      const complete = await Complete.findOneById(id);
       res.json(complete);
     } catch (err) {
       console.error(err);
@@ -77,12 +89,8 @@ router
     try {
       const { id } = req.params;
       const { responses } = req.body;
-      const complete = await Complete.findByIdAndUpdate(
-        id,
-        { responses },
-        { new: true },
-      );
-      res.status(201).json(complete);
+      const updatedComplete = await Complete.updateById(id, { responses });
+      res.status(201).json(updatedComplete);
     } catch (err) {
       console.error(err);
       res.status(500).json({
@@ -94,8 +102,8 @@ router
   .delete(async (req, res) => {
     try {
       const { id } = req.params;
-      const complete = await Complete.findByIdAndDelete(id);
-      res.json(complete);
+      const deletedComplete = await Complete.deleteById(id);
+      res.json(deletedComplete);
     } catch (err) {
       console.error(err);
       res.status(500).json({ state: false, message: "Cannot delete complete" });
