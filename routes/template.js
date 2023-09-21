@@ -5,39 +5,42 @@ const form = require("../models/form");
 const formContent = require("../models/formContent");
 const templateOption = require("../models/templateOption");
 const logic = require("../models/logic");
+const { checkAuthorization } = require("../lib/middleware/checkAuthorization");
 
-router.get("/", async (req, res) => {
+router.get("/", checkAuthorization, async (req, res) => {
+  const { userId } = req.body;
+
   try {
-    const templateData = await template.findAll({
-      userId: req.query.userId,
-    });
+    if (!userId) throw new Error("Have No UserId");
+    const templateData = await template.findAllByUserId(userId);
 
     res.status(200).json(templateData);
   } catch (err) {
     console.error("Error getting template:", err);
-    res.status(500).json({ error: "Failed to get template" });
+    res.status(500).json({ error: "Failed to get template", msg: err.message });
   }
 });
 
-router.get("/properties", async (req, res) => {
+router.get("/properties", checkAuthorization, async (req, res) => {
+  const { templateId } = req.query;
+  const { userId } = req.body;
+
   try {
-    const formData = await form.findAll({
-      templateId: req.query.templateId,
-    });
+    if (!templateId || !userId) throw new Error("Have No TemplateId || UserId");
 
-    const formContentData = await formContent.findAll({
-      templateId: req.query.templateId,
-    });
+    const templateData = await template.findAllByTemplateId(templateId);
 
-    const templateOptionData = await templateOption.findAll({
-      templateId: req.query.templateId,
-    });
+    const formData = await form.findAllByTemplateId(templateId);
 
-    const logicData = await logic.findAll({
-      templateId: req.query.templateId,
-    });
+    const formContentData = await formContent.findAllByTemplateId(templateId);
+
+    const templateOptionData =
+      await templateOption.findAllByTemplateId(templateId);
+
+    const logicData = await logic.findAllByTemplateId(templateId);
 
     res.status(200).json({
+      template: templateData,
       form: formData,
       formContent: formContentData,
       templateOption: templateOptionData,
@@ -45,54 +48,100 @@ router.get("/properties", async (req, res) => {
     });
   } catch (err) {
     console.error("Error getting template:", err);
-    res.status(500).json({ error: "Failed to get template" });
+    res.status(500).json({ error: "Failed to get template", msg: err.message });
   }
 });
 
-router.post("/", async (req, res) => {
+router.get("/respondent", async (req, res) => {
+  const { templateId } = req.query;
+
   try {
+    if (!templateId) throw new Error("Have No TemplateId ");
+
+    const templateData = await template.findAllByTemplateId(templateId);
+
+    const formData = await form.findAllByTemplateId(templateId);
+
+    const formContentData = await formContent.findAllByTemplateId(templateId);
+
+    const templateOptionData =
+      await templateOption.findAllByTemplateId(templateId);
+
+    const logicData = await logic.findAllByTemplateId(templateId);
+
+    res.status(200).json({
+      template: templateData,
+      form: formData,
+      formContent: formContentData,
+      templateOption: templateOptionData,
+      logic: logicData,
+    });
+  } catch (err) {
+    console.error("Error getting template:", err);
+    res.status(500).json({ error: "Failed to get template", msg: err.message });
+  }
+});
+
+router.post("/", checkAuthorization, async (req, res) => {
+  const { userId } = req.body;
+
+  try {
+    if (!userId) throw new Error("Have No UserId");
+
     const newTemplate = await template.create(req.body);
     res.status(201).json(newTemplate);
   } catch (err) {
     console.error("Error creating template:", err);
-    res.status(500).json({ error: "Failed to create template" });
+    res
+      .status(500)
+      .json({ error: "Failed to create template", msg: err.message });
   }
 });
 
-router.put("/properties", async (req, res) => {
-  try {
-    await template.updateOne({ _id: req.body.template._id }, req.body.template);
+router.put("/properties", checkAuthorization, async (req, res) => {
+  const {
+    templateInfo,
+    formsInfo,
+    formContentsInfo,
+    templateOptionInfo,
+    logicsInfo,
+    userId,
+  } = req.body;
 
-    if (req.body.forms) {
+  try {
+    if (!userId) throw new Error("Have No UserId");
+    await template.updateOneByTemplateId(templateInfo._id, templateInfo);
+
+    if (formsInfo) {
       await Promise.all(
-        req.body.forms.map(async (formData) => {
-          await form.updateOne({ _id: formData._id }, formData);
+        formsInfo.map(async (formData) => {
+          await form.updateOneByFormId(formData._id, formData);
         }),
       );
     }
 
-    if (req.body.formContents) {
+    if (formContentsInfo) {
       await Promise.all(
-        req.body.formContents.map(async (formContentData) => {
-          await formContent.updateOne(
-            { _id: formContentData._id },
+        formContentsInfo.map(async (formContentData) => {
+          await formContent.updateOneByFormId(
+            formContentData.formId,
             formContentData,
           );
         }),
       );
     }
 
-    if (req.body.templateOption) {
-      await templateOption.updateOne(
-        { templateId: req.body.template._id },
-        req.body.templateOption,
+    if (templateOptionInfo) {
+      await templateOption.updateOneBytemplateId(
+        templateInfo._id,
+        templateOptionInfo,
       );
     }
 
-    if (req.body.logics) {
+    if (logicsInfo) {
       await Promise.all(
-        req.body.logics.map(async (logicData) => {
-          await logic.updateOne({ _id: logicData._id }, logicData);
+        logicsInfo.map(async (logicData) => {
+          await logic.updateOneByLogicId(logicData._id, logicData);
         }),
       );
     }
@@ -100,25 +149,35 @@ router.put("/properties", async (req, res) => {
     res.status(200).json(true);
   } catch (err) {
     console.error("Error updating template:", err);
-    res.status(500).json({ error: "Failed to update template" });
+    res
+      .status(500)
+      .json({ error: "Failed to update template", msg: err.message });
   }
 });
 
-router.delete("/properties", async (req, res) => {
+router.delete("/properties", checkAuthorization, async (req, res) => {
+  const { templateIds, userId } = req.body;
+  // 추후 complete 삭제기능 추가예정
+  console.log(templateIds, userId);
   try {
+    if (!templateIds || !userId)
+      throw new Error("Have No TemplatesId || UserId");
+
     await Promise.all(
-      req.body.map(async (templateId) => {
-        await template.deleteOne({ _id: templateId });
-        await form.deleteMany({ templateId: templateId });
-        await formContent.deleteMany({ templateId: templateId });
-        await templateOption.deleteOne({ templateId: templateId });
-        await logic.deleteMany({ templateId: templateId });
+      templateIds.map(async (templateId) => {
+        await template.deleteOneByTemplateId(templateId);
+        await form.deleteManyByTemplateId(templateId);
+        await formContent.deleteManyByTemplateId(templateId);
+        await templateOption.deleteOneBytemplateId(templateId);
+        await logic.deleteManyByTemplateId(templateId);
       }),
     );
     res.status(200).json(true);
   } catch (err) {
     console.error("Error deleting template:", err);
-    res.status(500).json({ error: "Failed to delete template" });
+    res
+      .status(500)
+      .json({ error: "Failed to delete template", msg: err.message });
   }
 });
 

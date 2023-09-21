@@ -25,20 +25,23 @@ logicShema.statics.create = function (payload) {
   return logicData.save();
 };
 
-logicShema.statics.findAll = function (payload) {
-  return this.find(payload);
+logicShema.statics.findAllByTemplateId = function (templateId) {
+  return this.find({ templateId });
 };
 
-logicShema.static.updateOne = function (payload) {
-  return this.updateOne(payload);
+logicShema.statics.updateOneByLogicId = function (logicId, updateInfo) {
+  return this.updateOne(
+    { _id: logicId },
+    { ...updateInfo, updatedAt: new Date() },
+  );
 };
 
-logicShema.static.deleteMany = function (payload) {
-  return this.deleteMany(payload);
+logicShema.statics.deleteManyByTemplateId = function (templateId) {
+  return this.deleteMany({ templateId });
 };
 
-logicShema.static.deleteOne = function (payload) {
-  return this.deleteOne(payload);
+logicShema.statics.deleteOneByLogicId = function (logicId) {
+  return this.deleteOne({ _id: logicId });
 };
 
 module.exports = mongoose.model("Logic", logicShema);
