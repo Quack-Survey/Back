@@ -23,24 +23,27 @@ formShema.statics.create = function (payload) {
   return formData.save();
 };
 
-formShema.statics.findAll = function (payload) {
-  return this.find(payload);
+formShema.statics.findAllByFormId = function (formId) {
+  return this.find({ _id: formId });
 };
 
-formShema.static.updateOne = function (payload) {
-  return this.updateOne(payload);
+formShema.statics.findAllByTemplateId = function (templateId) {
+  return this.find({ templateId });
 };
 
-formShema.static.updateMany = function (payload) {
-  return this.updateMany(payload);
+formShema.statics.updateOneByFormId = function (formId, updateInfo) {
+  return this.updateOne(
+    { _id: formId },
+    { ...updateInfo, updatedAt: new Date() },
+  );
 };
 
-formShema.static.deleteMany = function (payload) {
-  return this.deleteMany(payload);
+formShema.statics.deleteManyByTemplateId = function (templateId) {
+  return this.deleteMany({ templateId });
 };
 
-formShema.static.deleteOne = function (payload) {
-  return this.deleteOne(payload);
+formShema.statics.deleteOneByFormId = function (formId) {
+  return this.deleteOne({ _id: formId });
 };
 
 module.exports = mongoose.model("Form", formShema);
