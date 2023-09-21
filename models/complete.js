@@ -1,13 +1,10 @@
 const mongoose = require("mongoose");
 mongoose.set("useFindAndModify", false);
 
-const { Schema } = mongoose;
-const { ObjectId } = Schema.Types;
-
-const completeSchema = new Schema(
+const completeSchema = new mongoose.Schema(
   {
     templateId: {
-      type: ObjectId,
+      type: mongoose.Schema.Types,
       required: true,
       ref: "Template",
     },
@@ -19,12 +16,34 @@ const completeSchema = new Schema(
     },
     responses: [
       {
-        formId: { type: ObjectId, required: true, ref: "Form" },
+        formId: { type: mongoose.Schema.Types, required: true, ref: "Form" },
         response: [String],
       },
     ],
   },
   { timestamps: true },
 );
+
+completeSchema.statics.create = function (data) {
+  const completeData = new this(data);
+
+  return completeData.save();
+};
+
+completeSchema.statics.findAllWithOptions = function (options) {
+  return this.find(options);
+};
+
+completeSchema.statics.findOneById = function (id) {
+  return this.findById(id);
+};
+
+completeSchema.statics.updateById = function (id, data) {
+  return this.findByIdAndUpdate(id, { state: 1, ...data }, { new: true });
+};
+
+completeSchema.statics.deleteById = function (id) {
+  return this.findByIdAndDelete(id);
+};
 
 module.exports = mongoose.model("Complete", completeSchema);
