@@ -26,15 +26,15 @@ userSchema.statics.findOneByEmail = function (email) {
   return this.find({ email });
 };
 
-userSchema.statics.findOneByUserid = function (userid) {
+userSchema.statics.findOneByUserId = function (userid) {
   return this.find({ _id: userid });
 };
 
-userSchema.statics.updateByUserid = function (userid, payload) {
+userSchema.statics.updateByUserId = function (userid, payload) {
   return this.updateOne({ _id: userid }, payload);
 };
 
-userSchema.statics.deleteByUserid = function (userid) {
+userSchema.statics.deleteByUserId = function (userid) {
   return this.deleteMany({ _id: userid });
 };
 
