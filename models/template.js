@@ -1,0 +1,48 @@
+const mongoose = require("mongoose");
+
+const templateShema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    targetNumber: { type: Number, required: true },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    bookMark: { type: Boolean, default: false },
+    deadline: { type: Date, default: null },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+templateShema.statics.create = function (payload) {
+  const templateData = new this(payload);
+  return templateData.save();
+};
+
+templateShema.statics.findAllByUserId = function (userId) {
+  return this.find({ userId });
+};
+
+templateShema.statics.findAllByTemplateId = function (templateId) {
+  return this.find({ _id: templateId });
+};
+
+templateShema.statics.updateOneByTemplateId = function (
+  templateId,
+  updateInfo,
+) {
+  return this.updateOne(
+    { _id: templateId },
+    { ...updateInfo, updatedAt: new Date() },
+  );
+};
+
+templateShema.statics.deleteOneByTemplateId = function (templateId) {
+  return this.deleteOne({ _id: templateId });
+};
+
+module.exports = mongoose.model("Template", templateShema);
