@@ -35,9 +35,8 @@ router
   .post(async (req, res) => {
     const { templateId } = req.query;
     try {
-      const complete = await Complete.create({
-        templateId,
-      });
+      const id = new mongo.ObjectID(templateId);
+      const complete = await Complete.create({ templateId: id });
       res.status(201).json(complete);
     } catch (err) {
       console.error(err);
