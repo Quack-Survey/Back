@@ -81,7 +81,11 @@ router.post("/login", checkUserData, async (req, res) => {
     res
       .cookie("accessToken", accessToken, cookieOptions)
       .cookie("refreshToken", refreshToken, cookieOptions)
-      .json({ state: true, message: "Login success." });
+      .json({
+        state: true,
+        message: "Login success.",
+        data: { username: userData.username },
+      });
   } catch (err) {
     res.status(400).json({ state: false, message: err.message });
   }
