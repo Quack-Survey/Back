@@ -13,8 +13,18 @@ router.get("/", checkAuthorization, async (req, res) => {
   try {
     if (!userId) throw new Error("Have No UserId");
     const templateData = await template.findAllByUserId(userId);
-
-    res.status(200).json(templateData);
+    const payload = templateData.map((templateInfo) => {
+      return {
+        title: templateInfo.title,
+        description: templateInfo.description,
+        targetNumber: templateInfo.targetNumber,
+        bookMark: templateInfo.bookMark,
+        deadline: templateInfo.deadline,
+        updatedAt: templateInfo.updatedAt,
+        createdAt: templateInfo.createdAt,
+      };
+    });
+    res.status(200).json(payload);
   } catch (err) {
     console.error("Error getting template:", err);
     res.status(500).json({ error: "Failed to get template", msg: err.message });
@@ -39,13 +49,23 @@ router.get("/properties", checkAuthorization, async (req, res) => {
 
     const logicData = await logic.findAllByTemplateId(templateId);
 
-    res.status(200).json({
-      template: templateData,
+    const payload = {
+      template: {
+        title: templateData.title,
+        description: templateData.description,
+        targetNumber: templateData.targetNumber,
+        bookMark: templateData.bookMark,
+        deadline: templateData.deadline,
+        updatedAt: templateData.updatedAt,
+        createdAt: templateData.createdAt,
+      },
       form: formData,
       formContent: formContentData,
       templateOption: templateOptionData,
       logic: logicData,
-    });
+    };
+
+    res.status(200).json(payload);
   } catch (err) {
     console.error("Error getting template:", err);
     res.status(500).json({ error: "Failed to get template", msg: err.message });
@@ -69,13 +89,23 @@ router.get("/respondent", async (req, res) => {
 
     const logicData = await logic.findAllByTemplateId(templateId);
 
-    res.status(200).json({
-      template: templateData,
+    const payload = {
+      template: {
+        title: templateData.title,
+        description: templateData.description,
+        targetNumber: templateData.targetNumber,
+        bookMark: templateData.bookMark,
+        deadline: templateData.deadline,
+        updatedAt: templateData.updatedAt,
+        createdAt: templateData.createdAt,
+      },
       form: formData,
       formContent: formContentData,
       templateOption: templateOptionData,
       logic: logicData,
-    });
+    };
+
+    res.status(200).json(payload);
   } catch (err) {
     console.error("Error getting template:", err);
     res.status(500).json({ error: "Failed to get template", msg: err.message });
