@@ -8,10 +8,36 @@ const { cookieOptions } = require("../lib/config/cookieConfig");
 const { createNickname, getUserData } = require("../lib/utils/usersUtils");
 
 router.get("/", checkAuthorization, async (req, res) => {
-  try {
-    const data = await users.findAll();
+  const { userId } = req.body;
 
-    res.json(data);
+  try {
+    const userData = (await users.findOneByUserId(userId))[0];
+    const payload = {
+      email: userData.email,
+      username: userData.username,
+      createdAt: userData.createdAt,
+      updatedAt: userData.updatedAt,
+    };
+
+    res.json(payload);
+  } catch (err) {
+    res.status(403).json({ state: false, message: "No permission." });
+  }
+});
+
+router.get("/all", checkAuthorization, async (req, res) => {
+  try {
+    const userData = await users.findAll();
+    const payload = userData.map((data) => {
+      return {
+        email: data.email,
+        username: data.username,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+      };
+    });
+
+    res.json(payload);
   } catch (err) {
     res.status(403).json({ state: false, message: "No permission." });
   }
@@ -55,7 +81,11 @@ router.post("/login", checkUserData, async (req, res) => {
     res
       .cookie("accessToken", accessToken, cookieOptions)
       .cookie("refreshToken", refreshToken, cookieOptions)
-      .json({ state: true, message: "Login success." });
+      .json({
+        state: true,
+        message: "Login success.",
+        data: { username: userData.username },
+      });
   } catch (err) {
     res.status(400).json({ state: false, message: err.message });
   }
