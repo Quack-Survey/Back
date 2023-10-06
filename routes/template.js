@@ -38,7 +38,7 @@ router.get("/properties", checkAuthorization, async (req, res) => {
   try {
     if (!templateId || !userId) throw new Error("Have No TemplateId || UserId");
 
-    const templateData = await template.findAllByTemplateId(templateId);
+    const templateData = await template.findById(templateId);
 
     const formData = await form.findAllByTemplateId(templateId);
 

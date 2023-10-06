@@ -4,7 +4,7 @@ const templateShema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     description: { type: String, required: true },
-    targetNumber: { type: Number, required: true },
+    targetNumber: { type: Number, default: 0 },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -29,6 +29,10 @@ templateShema.statics.findAllByUserId = function (userId) {
 
 templateShema.statics.findAllByTemplateId = function (templateId) {
   return this.find({ _id: templateId });
+};
+
+templateShema.statics.findByTemplateId = function (templateId) {
+  return this.findById({ _id: templateId });
 };
 
 templateShema.statics.updateOneByTemplateId = function (
