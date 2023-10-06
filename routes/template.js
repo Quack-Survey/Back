@@ -185,6 +185,26 @@ router.put("/properties", checkAuthorization, async (req, res) => {
   }
 });
 
+router.put("/", checkAuthorization, async (req, res) => {
+  const { templateId } = req.query;
+  const { title, description, userId } = req.body;
+  console.log(req.body);
+  try {
+    if (!userId && templateId && title && description && description)
+      throw new Error("Have No UserId");
+    const mutateTemplate = await template.updateOneByTemplateId(templateId, {
+      title,
+      description,
+    });
+    res.status(200).json(mutateTemplate);
+  } catch (err) {
+    console.error("Error updating template:", err);
+    res
+      .status(500)
+      .json({ error: "Failed to update template", msg: err.message });
+  }
+});
+
 router.delete("/properties", checkAuthorization, async (req, res) => {
   const { templateIds, userId } = req.body;
   // 추후 complete 삭제기능 추가예정

@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 
 const templateShema = new mongoose.Schema(
   {
-    title: { type: String, required: true },
-    description: { type: String, required: true },
+    title: { type: String, required: false },
+    description: { type: String, required: false },
     targetNumber: { type: Number, default: 0 },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
