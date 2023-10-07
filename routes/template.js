@@ -187,15 +187,14 @@ router.put("/properties", checkAuthorization, async (req, res) => {
 
 router.put("/", checkAuthorization, async (req, res) => {
   const { templateId } = req.query;
-  const { title, description, userId } = req.body;
-  console.log(req.body);
+  const { userId } = req.body;
+
   try {
-    if (!userId && templateId && title && description && description)
-      throw new Error("Have No UserId");
-    const mutateTemplate = await template.updateOneByTemplateId(templateId, {
-      title,
-      description,
-    });
+    if (!userId && templateId) throw new Error("Have No UserId");
+    const mutateTemplate = await template.updateOneByTemplateId(
+      templateId,
+      req.body,
+    );
     res.status(200).json(mutateTemplate);
   } catch (err) {
     console.error("Error updating template:", err);

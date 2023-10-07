@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 
 const formContentShema = new mongoose.Schema(
   {
-    text: { type: String, required: false },
     select: { type: Array, required: true },
     formId: {
       type: mongoose.Schema.Types.ObjectId,
