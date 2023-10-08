@@ -2,7 +2,6 @@ const router = require("express").Router();
 
 const template = require("../models/template");
 const form = require("../models/form");
-const formContent = require("../models/formContent");
 const templateOption = require("../models/templateOption");
 const logic = require("../models/logic");
 const { checkAuthorization } = require("../lib/middleware/checkAuthorization");
@@ -42,8 +41,6 @@ router.get("/properties", checkAuthorization, async (req, res) => {
 
     const formData = await form.findAllByTemplateId(templateId);
 
-    const formContentData = await formContent.findAllByTemplateId(templateId);
-
     const templateOptionData =
       await templateOption.findAllByTemplateId(templateId);
 
@@ -60,7 +57,6 @@ router.get("/properties", checkAuthorization, async (req, res) => {
         createdAt: templateData.createdAt,
       },
       form: formData,
-      formContent: formContentData,
       templateOption: templateOptionData,
       logic: logicData,
     };
@@ -82,8 +78,6 @@ router.get("/respondent", async (req, res) => {
 
     const formData = await form.findAllByTemplateId(templateId);
 
-    const formContentData = await formContent.findAllByTemplateId(templateId);
-
     const templateOptionData =
       await templateOption.findAllByTemplateId(templateId);
 
@@ -100,7 +94,6 @@ router.get("/respondent", async (req, res) => {
         createdAt: templateData.createdAt,
       },
       form: formData,
-      formContent: formContentData,
       templateOption: templateOptionData,
       logic: logicData,
     };
@@ -129,14 +122,8 @@ router.post("/", checkAuthorization, async (req, res) => {
 });
 
 router.put("/properties", checkAuthorization, async (req, res) => {
-  const {
-    templateInfo,
-    formsInfo,
-    formContentsInfo,
-    templateOptionInfo,
-    logicsInfo,
-    userId,
-  } = req.body;
+  const { templateInfo, formsInfo, templateOptionInfo, logicsInfo, userId } =
+    req.body;
 
   try {
     if (!userId) throw new Error("Have No UserId");
@@ -146,17 +133,6 @@ router.put("/properties", checkAuthorization, async (req, res) => {
       await Promise.all(
         formsInfo.map(async (formData) => {
           await form.updateOneByFormId(formData._id, formData);
-        }),
-      );
-    }
-
-    if (formContentsInfo) {
-      await Promise.all(
-        formContentsInfo.map(async (formContentData) => {
-          await formContent.updateOneByFormId(
-            formContentData.formId,
-            formContentData,
-          );
         }),
       );
     }
@@ -216,7 +192,6 @@ router.delete("/properties", checkAuthorization, async (req, res) => {
       templateIds.map(async (templateId) => {
         await template.deleteOneByTemplateId(templateId);
         await form.deleteManyByTemplateId(templateId);
-        await formContent.deleteManyByTemplateId(templateId);
         await templateOption.deleteOneBytemplateId(templateId);
         await logic.deleteManyByTemplateId(templateId);
       }),

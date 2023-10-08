@@ -4,6 +4,7 @@ const formShema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     type: { type: String, required: true },
+    select: { type: Array, required: true },
     order: { type: Number, required: true },
     plural: { type: Boolean, default: false },
     bookMark: { type: Boolean, default: false },
