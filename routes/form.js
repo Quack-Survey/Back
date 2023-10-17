@@ -23,7 +23,9 @@ router.get("/all", async (req, res) => {
     if (!templateId) throw new Error("Have No formId");
 
     const formData = await form.findAllByTemplateId(templateId);
-    res.status(200).json(formData);
+    const sortByOrder = formData.sort((a, b) => a.order - b.order);
+
+    res.status(200).json(sortByOrder);
   } catch (err) {
     console.error("Error getting form:", err);
     res.status(500).json({ error: "Failed to get form", msg: err.message });

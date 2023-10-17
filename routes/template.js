@@ -40,6 +40,7 @@ router.get("/properties", checkAuthorization, async (req, res) => {
     const templateData = await template.findById(templateId);
 
     const formData = await form.findAllByTemplateId(templateId);
+    const sortByOrder = formData.sort((a, b) => a.order - b.order);
 
     const templateOptionData =
       await templateOption.findAllByTemplateId(templateId);
@@ -56,7 +57,7 @@ router.get("/properties", checkAuthorization, async (req, res) => {
         updatedAt: templateData.updatedAt,
         createdAt: templateData.createdAt,
       },
-      form: formData,
+      form: sortByOrder,
       templateOption: templateOptionData,
       logic: logicData,
     };
