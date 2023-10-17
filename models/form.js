@@ -15,7 +15,6 @@ const formShema = new mongoose.Schema(
     type: { type: String, required: true },
     select: { type: Array, required: true },
     order: { type: Number, required: true },
-    isQuater: { type: Boolean, default: false },
     plural: { type: Boolean, default: false },
     bookMark: { type: Boolean, default: false },
     templateId: {

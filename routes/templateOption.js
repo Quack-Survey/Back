@@ -20,12 +20,19 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  try {
-    if (!req.body || !req.body.quater.length === 0)
-      throw new Error("Have No Body");
+  const { templateId } = req.query;
+  const { quater, formId } = req.body;
 
-    await templateOption.create(req.body);
-    res.status(201).json(true);
+  try {
+    if (!quater || !formId || !templateId)
+      throw new Error("Have No Body || templateId");
+
+    const newTemplateOption = await templateOption.create({
+      quater,
+      formId,
+      templateId,
+    });
+    res.status(201).json(newTemplateOption);
   } catch (err) {
     console.error("Error creating templateOption:", err);
     res
@@ -41,11 +48,12 @@ router.put("/", async (req, res) => {
     if (!templateOptionId || !req.body)
       throw new Error("Have No Query || Body");
 
-    await templateOption.updateOneBytemplateOptionId(
-      templateOptionId,
-      req.body,
-    );
-    res.status(200).json(true);
+    const updateTemplateOption =
+      await templateOption.updateOneBytemplateOptionId(
+        templateOptionId,
+        req.body,
+      );
+    res.status(200).json(updateTemplateOption);
   } catch (err) {
     console.error("Error updating templateOption:", err);
     res

@@ -16,6 +16,20 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/all", async (req, res) => {
+  const { templateId } = req.query;
+
+  try {
+    if (!templateId) throw new Error("Have No formId");
+
+    const formData = await form.findAllByTemplateId(templateId);
+    res.status(200).json(formData);
+  } catch (err) {
+    console.error("Error getting form:", err);
+    res.status(500).json({ error: "Failed to get form", msg: err.message });
+  }
+});
+
 router.post("/", async (req, res) => {
   try {
     if (!req.body) throw new Error("Have No Body");

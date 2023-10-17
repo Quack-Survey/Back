@@ -11,7 +11,7 @@ const templateShema = new mongoose.Schema(
       required: true,
     },
     bookMark: { type: Boolean, default: false },
-    deadline: { type: Date, default: null },
+    deadLine: { type: Date, default: null },
   },
   {
     timestamps: true,
