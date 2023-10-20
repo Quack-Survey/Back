@@ -13,9 +13,7 @@ const templateShema = new mongoose.Schema(
     bookMark: { type: Boolean, default: false },
     deadLine: { type: Date, default: null },
   },
-  {
-    timestamps: true,
-  },
+  { versionKey: false, timestamps: true },
 );
 
 templateShema.statics.create = function (payload) {
