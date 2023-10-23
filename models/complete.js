@@ -31,7 +31,13 @@ completeSchema.statics.create = function (data) {
 };
 
 completeSchema.statics.findAllWithOptions = function (options) {
-  return this.find(options);
+  return this.find(options).populate({
+    path: "responses",
+    populate: {
+      path: "formId",
+      select: "title description",
+    },
+  });
 };
 
 completeSchema.statics.findOneById = function (id) {

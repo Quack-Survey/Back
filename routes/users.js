@@ -13,10 +13,13 @@ router.get("/", checkAuthorization, async (req, res) => {
   try {
     const userData = (await users.findOneByUserId(userId))[0];
     const payload = {
-      email: userData.email,
-      username: userData.username,
-      createdAt: userData.createdAt,
-      updatedAt: userData.updatedAt,
+      state: true,
+      data: {
+        email: userData.email,
+        username: userData.username,
+        createdAt: userData.createdAt,
+        updatedAt: userData.updatedAt,
+      },
     };
 
     res.json(payload);
@@ -27,8 +30,7 @@ router.get("/", checkAuthorization, async (req, res) => {
 
 router.get("/all", checkAuthorization, async (req, res) => {
   try {
-    const userData = await users.findAll();
-    const payload = userData.map((data) => {
+    const userData = (await users.findAll()).map((data) => {
       return {
         email: data.email,
         username: data.username,
@@ -36,6 +38,11 @@ router.get("/all", checkAuthorization, async (req, res) => {
         updatedAt: data.updatedAt,
       };
     });
+
+    const payload = {
+      state: true,
+      data: userData,
+    };
 
     res.json(payload);
   } catch (err) {
@@ -60,6 +67,7 @@ router.post("/signup", checkUserData, async (req, res) => {
 
     res.status(201).json({ state: true, message: "Request Success." });
   } catch (err) {
+    console.log(err);
     res.status(400).json({ state: false, message: err.message });
   }
 });
