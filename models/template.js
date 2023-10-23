@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 
 const templateShema = new mongoose.Schema(
   {
-    title: { type: String, required: true },
-    description: { type: String, required: true },
-    targetNumber: { type: Number, required: true },
+    title: { type: String, required: false },
+    description: { type: String, required: false },
+    targetNumber: { type: Number, default: 0 },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -13,9 +13,7 @@ const templateShema = new mongoose.Schema(
     bookMark: { type: Boolean, default: false },
     deadline: { type: Date, default: null },
   },
-  {
-    timestamps: true,
-  },
+  { versionKey: false, timestamps: true },
 );
 
 templateShema.statics.create = function (payload) {
@@ -29,6 +27,10 @@ templateShema.statics.findAllByUserId = function (userId) {
 
 templateShema.statics.findAllByTemplateId = function (templateId) {
   return this.find({ _id: templateId });
+};
+
+templateShema.statics.findByTemplateId = function (templateId) {
+  return this.findById({ _id: templateId });
 };
 
 templateShema.statics.updateOneByTemplateId = function (
