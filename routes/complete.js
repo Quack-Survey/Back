@@ -87,8 +87,11 @@ router
   .patch(async (req, res) => {
     try {
       const { id } = req.params;
+      const completeId = new mongo.ObjectID(id);
       const { responses } = req.body;
-      const updatedComplete = await Complete.updateById(id, { responses });
+      const updatedComplete = await Complete.updateById(completeId, {
+        responses,
+      });
       res.status(201).json(updatedComplete);
     } catch (err) {
       console.error(err);
