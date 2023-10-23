@@ -16,6 +16,7 @@ const logicShema = new mongoose.Schema(
     },
   },
   {
+    versionKey: false,
     timestamps: true,
   },
 );
