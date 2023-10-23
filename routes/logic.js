@@ -3,6 +3,20 @@ const router = require("express").Router();
 const logic = require("../models/logic");
 
 router.get("/", async (req, res) => {
+  const { formId } = req.query;
+
+  try {
+    if (!formId) throw new Error("Have No FormId");
+
+    const logicData = await logic.findOneByFormId(formId);
+    res.status(200).json(logicData);
+  } catch (err) {
+    console.error("Error getting logic:", err);
+    res.status(500).json({ error: "Failed to get logic", msg: err.message });
+  }
+});
+
+router.get("/all", async (req, res) => {
   const { templateId } = req.query;
 
   try {

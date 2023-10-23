@@ -2,8 +2,19 @@ const mongoose = require("mongoose");
 
 const formShema = new mongoose.Schema(
   {
-    title: { type: String, required: true },
+    title: {
+      type: String,
+      default: "",
+      validate: {
+        validator: function (title) {
+          return title !== undefined && title !== null;
+        },
+        message: "Title cannot be undefined or null",
+      },
+    },
+    required: { type: Boolean, default: true },
     type: { type: String, required: true },
+    select: { type: Array, required: true },
     order: { type: Number, required: true },
     plural: { type: Boolean, default: false },
     bookMark: { type: Boolean, default: false },
@@ -14,6 +25,7 @@ const formShema = new mongoose.Schema(
     },
   },
   {
+    versionKey: false,
     timestamps: true,
   },
 );
