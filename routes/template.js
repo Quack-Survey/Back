@@ -14,6 +14,7 @@ router.get("/", checkAuthorization, async (req, res) => {
     const templateData = await template.findAllByUserId(userId);
     const payload = templateData.map((templateInfo) => {
       return {
+        _id: templateInfo._id,
         title: templateInfo.title,
         description: templateInfo.description,
         targetNumber: templateInfo.targetNumber,
@@ -30,6 +31,31 @@ router.get("/", checkAuthorization, async (req, res) => {
   }
 });
 
+router.get("/one", checkAuthorization, async (req, res) => {
+  const { userId } = req.body;
+  const { templateId } = req.query;
+
+  try {
+    if (!userId || !templateId)
+      throw new Error("Have No UserId || templatedId");
+    const templateData = await template.findByTemplateId(templateId);
+    const payload = {
+      _id: templateData._id,
+      title: templateData.title,
+      description: templateData.description,
+      targetNumber: templateData.targetNumber,
+      bookMark: templateData.bookMark,
+      deadline: templateData.deadline,
+      updatedAt: templateData.updatedAt,
+      createdAt: templateData.createdAt,
+    };
+    res.status(200).json(payload);
+  } catch (err) {
+    console.error("Error getting template:", err);
+    res.status(500).json({ error: "Failed to get template", msg: err.message });
+  }
+});
+
 router.get("/properties", checkAuthorization, async (req, res) => {
   const { templateId } = req.query;
   const { userId } = req.body;
@@ -37,7 +63,7 @@ router.get("/properties", checkAuthorization, async (req, res) => {
   try {
     if (!templateId || !userId) throw new Error("Have No TemplateId || UserId");
 
-    const templateData = await template.findById(templateId);
+    const templateData = await template.findByTemplateId(templateId);
 
     const formData = await form.findAllByTemplateId(templateId);
     const sortByOrder = formData.sort((a, b) => a.order - b.order);
@@ -49,6 +75,7 @@ router.get("/properties", checkAuthorization, async (req, res) => {
 
     const payload = {
       template: {
+        _id: templateData._id,
         title: templateData.title,
         description: templateData.description,
         targetNumber: templateData.targetNumber,
@@ -86,6 +113,7 @@ router.get("/respondent", async (req, res) => {
 
     const payload = {
       template: {
+        _id: templateData._id,
         title: templateData.title,
         description: templateData.description,
         targetNumber: templateData.targetNumber,

@@ -58,6 +58,22 @@ router.put("/", async (req, res) => {
   }
 });
 
+router.put("/order", async (req, res) => {
+  try {
+    if (!req?.body) throw new Error("Have No body");
+
+    Promise.all(
+      req.body?.map(async (formId, i) => {
+        await form.updateOneByFormId(formId, { order: i + 1 });
+      }),
+    );
+    res.status(200).json(true);
+  } catch (err) {
+    console.error("Error updating form:", err);
+    res.status(500).json({ error: "Failed to update form", msg: err.message });
+  }
+});
+
 router.delete("/", async (req, res) => {
   const { formId } = req.query;
 
