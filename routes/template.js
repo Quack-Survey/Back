@@ -105,6 +105,7 @@ router.get("/respondent", async (req, res) => {
     const templateData = await template.findAllByTemplateId(templateId);
 
     const formData = await form.findAllByTemplateId(templateId);
+    const sortByOrder = formData.sort((a, b) => a.order - b.order);
 
     const templateOptionData =
       await templateOption.findAllByTemplateId(templateId);
@@ -122,7 +123,7 @@ router.get("/respondent", async (req, res) => {
         updatedAt: templateData[0].updatedAt,
         createdAt: templateData[0].createdAt,
       },
-      form: formData,
+      form: sortByOrder,
       templateOption: templateOptionData,
       logic: logicData,
     };
