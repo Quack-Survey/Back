@@ -113,14 +113,14 @@ router.get("/respondent", async (req, res) => {
 
     const payload = {
       template: {
-        _id: templateData._id,
-        title: templateData.title,
-        description: templateData.description,
-        targetNumber: templateData.targetNumber,
-        bookMark: templateData.bookMark,
-        deadline: templateData.deadline,
-        updatedAt: templateData.updatedAt,
-        createdAt: templateData.createdAt,
+        _id: templateData[0]._id,
+        title: templateData[0].title,
+        description: templateData[0].description,
+        targetNumber: templateData[0].targetNumber,
+        bookMark: templateData[0].bookMark,
+        deadline: templateData[0].deadline,
+        updatedAt: templateData[0].updatedAt,
+        createdAt: templateData[0].createdAt,
       },
       form: formData,
       templateOption: templateOptionData,
