@@ -1,115 +1,39 @@
-const express = require("express");
-const router = express.Router();
+const router = require("express").Router();
+const complete = require("../models/complete");
 const { checkAuthorization } = require("../lib/middleware/checkAuthorization");
-const Complete = require("../models/complete");
-const Template = require("../models/template");
-const { mongo } = require("mongoose");
-require("../models/template");
 
-router
-  .route("")
-  .get(checkAuthorization, async (req, res) => {
-    try {
-      const { templateId } = req.query;
-      const { userId } = req.body;
-      if (templateId) {
-        const template = await Template.findById(templateId);
-        const targetUserId = template.userId + "";
-        if (targetUserId !== userId + "") {
-          throw new Error("userId doesn't match");
-        }
-        const id = new mongo.ObjectID(templateId);
-        const completes = await Complete.findAllWithOptions({ templateId: id });
-        res.json(completes);
-      }
-      if (!templateId) {
-        res.status(400).json({ message: "Write template id" });
-      }
-    } catch (err) {
-      console.error(err);
-      res
-        .status(500)
-        .json({ state: false, message: "Cannot get all completes" });
-    }
-  })
-  .post(async (req, res) => {
-    const { templateId } = req.query;
-    try {
-      const id = new mongo.ObjectID(templateId);
-      const complete = await Complete.create({ templateId: id });
-      res.status(201).json(complete);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ state: false, message: "Cannot create complete" });
-    }
-  });
+router.get("/", checkAuthorization, async (req, res) => {
+  const { templateId } = req.query;
 
-router.route("/user").get(checkAuthorization, async (req, res) => {
   try {
-    const { userId } = req.body;
-    if (userId) {
-      const bookmarkedTemplates = await Template.find({
-        userId: userId,
-        bookMark: true,
-      });
-      const completes = await Promise.all(
-        bookmarkedTemplates.map(async ({ _id }) => {
-          return await Complete.findAllWithOptions({
-            templateId: _id,
-          });
-        }),
-      );
-      res.json(completes.map((arr) => (arr.length === 0 ? [null] : arr)));
-    }
-    if (!userId) {
-      res.status(400).json({ message: "User id does not exist" });
-    }
+    if (!templateId) throw new Error("Have No templateId");
+
+    const alreadyComplete = await complete.findAllByTemplateId({ templateId });
+    res.status(200).json(alreadyComplete);
   } catch (err) {
-    console.error(err);
-    res
-      .status(500)
-      .json({ state: false, message: "Cannot get user's completes" });
+    console.error("Error getting complete:", err);
+    res.status(500).json({ error: "Failed to get complete", msg: err.message });
   }
 });
 
-router
-  .route("/:id")
-  .get(async (req, res) => {
-    try {
-      const { id } = req.params;
-      const complete = await Complete.findOneById(id);
-      res.json(complete);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ state: false, message: "Cannot get complete" });
-    }
-  })
-  .patch(async (req, res) => {
-    try {
-      const { id } = req.params;
-      const completeId = new mongo.ObjectID(id);
-      const { responses } = req.body;
-      const updatedComplete = await Complete.updateById(completeId, {
-        responses,
-      });
-      res.status(201).json(updatedComplete);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({
-        state: false,
-        message: "Cannot update complete. Please check your responses",
-      });
-    }
-  })
-  .delete(async (req, res) => {
-    try {
-      const { id } = req.params;
-      const deletedComplete = await Complete.deleteById(id);
-      res.json(deletedComplete);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ state: false, message: "Cannot delete complete" });
-    }
-  });
+router.post("/", async (req, res) => {
+  const { templateId } = req.query;
+
+  try {
+    if (!templateId || !req.body) throw new Error("Have No Body | templateId");
+
+    await complete.create({
+      templateId,
+      responses: [...req.body],
+    });
+
+    res.status(201).json(true);
+  } catch (err) {
+    console.error("Error creating respondent:", err);
+    res
+      .status(500)
+      .json({ error: "Failed to create respondent", msg: err.message });
+  }
+});
 
 module.exports = router;

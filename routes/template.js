@@ -4,6 +4,7 @@ const template = require("../models/template");
 const form = require("../models/form");
 const templateOption = require("../models/templateOption");
 const logic = require("../models/logic");
+const complete = require("../models/complete");
 const { checkAuthorization } = require("../lib/middleware/checkAuthorization");
 
 router.get("/", checkAuthorization, async (req, res) => {
@@ -105,6 +106,7 @@ router.get("/respondent", async (req, res) => {
     const templateData = await template.findAllByTemplateId(templateId);
 
     const formData = await form.findAllByTemplateId(templateId);
+    const sortByOrder = formData.sort((a, b) => a.order - b.order);
 
     const templateOptionData =
       await templateOption.findAllByTemplateId(templateId);
@@ -113,16 +115,16 @@ router.get("/respondent", async (req, res) => {
 
     const payload = {
       template: {
-        _id: templateData._id,
-        title: templateData.title,
-        description: templateData.description,
-        targetNumber: templateData.targetNumber,
-        bookMark: templateData.bookMark,
-        deadline: templateData.deadline,
-        updatedAt: templateData.updatedAt,
-        createdAt: templateData.createdAt,
+        _id: templateData[0]._id,
+        title: templateData[0].title,
+        description: templateData[0].description,
+        targetNumber: templateData[0].targetNumber,
+        bookMark: templateData[0].bookMark,
+        deadline: templateData[0].deadline,
+        updatedAt: templateData[0].updatedAt,
+        createdAt: templateData[0].createdAt,
       },
-      form: formData,
+      form: sortByOrder,
       templateOption: templateOptionData,
       logic: logicData,
     };
@@ -223,6 +225,7 @@ router.delete("/properties", checkAuthorization, async (req, res) => {
         await form.deleteManyByTemplateId(templateId);
         await templateOption.deleteOneBytemplateId(templateId);
         await logic.deleteManyByTemplateId(templateId);
+        await complete.deleteManyByTemplateId(templateId);
       }),
     );
     res.status(200).json(true);

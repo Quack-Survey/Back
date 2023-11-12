@@ -25,7 +25,6 @@ const logicShema = new mongoose.Schema(
     versionKey: false,
     timestamps: true,
   },
-
 );
 
 logicShema.statics.create = function (payload) {
