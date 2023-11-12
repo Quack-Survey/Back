@@ -4,6 +4,7 @@ const template = require("../models/template");
 const form = require("../models/form");
 const templateOption = require("../models/templateOption");
 const logic = require("../models/logic");
+const complete = require("../models/complete");
 const { checkAuthorization } = require("../lib/middleware/checkAuthorization");
 
 router.get("/", checkAuthorization, async (req, res) => {
@@ -224,6 +225,7 @@ router.delete("/properties", checkAuthorization, async (req, res) => {
         await form.deleteManyByTemplateId(templateId);
         await templateOption.deleteOneBytemplateId(templateId);
         await logic.deleteManyByTemplateId(templateId);
+        await complete.deleteManyByTemplateId(templateId);
       }),
     );
     res.status(200).json(true);
