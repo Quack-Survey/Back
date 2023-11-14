@@ -1,11 +1,30 @@
 const router = require("express").Router();
 const users = require("../models/user");
+const userTemps = require("../models/userTemp");
+const expireAuths = require("../models/expireAuth");
 const { encryptPassword, verifyPassword } = require("../lib/utils/encryptUtil");
 const { checkUserData } = require("../lib/middleware/checkUserData");
 const { generateToken } = require("../lib/utils/jwtUtil");
 const { checkAuthorization } = require("../lib/middleware/checkAuthorization");
 const { cookieOptions } = require("../lib/config/cookieConfig");
-const { createNickname, getUserData } = require("../lib/utils/usersUtils");
+const {
+  createNickname,
+  getUserData,
+  generateVerifyCode,
+} = require("../lib/utils/usersUtils");
+const { sendJoinMail, sendFindMail } = require("../lib/utils/emailUtils");
+
+router.get("/tempusers", async (req, res) => {
+  const userData = await userTemps.findAll();
+
+  res.send(userData);
+});
+
+router.get("/expireauth", async (req, res) => {
+  const expireAuthData = await expireAuths.findAll();
+
+  res.send(expireAuthData);
+});
 
 router.get("/", checkAuthorization, async (req, res) => {
   const { userId } = req.body;
@@ -15,6 +34,7 @@ router.get("/", checkAuthorization, async (req, res) => {
     const payload = {
       state: true,
       data: {
+        cert: userData.cert,
         email: userData.email,
         username: userData.username,
         createdAt: userData.createdAt,
@@ -32,6 +52,7 @@ router.get("/all", checkAuthorization, async (req, res) => {
   try {
     const userData = (await users.findAll()).map((data) => {
       return {
+        cert: data.cert,
         email: data.email,
         username: data.username,
         createdAt: data.createdAt,
@@ -55,19 +76,80 @@ router.post("/signup", checkUserData, async (req, res) => {
   const encryptedPassword = await encryptPassword(password);
 
   try {
-    const data = await users.findOneByEmail(email);
+    const userData = await users.findOneByEmail(email);
+    const userTempData = await userTemps.findOneByEmail(email);
 
-    if (data.length) throw new Error("Email already exists.");
+    if (userData.length || userTempData.length)
+      throw new Error("Email already exists.");
+    const verifyCode = await generateVerifyCode(email);
 
-    await users.create({
+    await userTemps.create({
       email,
+      verifyCode,
       username: username || createNickname(),
       ...encryptedPassword,
     });
 
+    sendJoinMail(email, verifyCode);
+
     res.status(201).json({ state: true, message: "Request Success." });
   } catch (err) {
-    console.log(err);
+    res.status(400).json({ state: false, message: err.message });
+  }
+});
+
+router.get("/verify", async (req, res) => {
+  const { email } = req.query;
+
+  try {
+    const userTempData = (await userTemps.findOneByEmail(email))[0];
+    const userData = (await users.findOneByEmail(email))[0];
+
+    if (userTempData) res.json({ state: true, cert: false });
+    else if (userData) throw new Error("Already Verification.");
+    else throw new Error("No Userdata.");
+  } catch (err) {
+    res.status(400).json({ state: false, message: err.message });
+  }
+});
+
+router.get("/verify/:code", async (req, res) => {
+  const { code } = req.params;
+  const { checkState } = req.query;
+
+  try {
+    const userTempData = (await userTemps.findOneByVerifyCode(code))[0];
+
+    if (userTempData && checkState) res.json({ state: true });
+    else if (userTempData) {
+      await users.create({
+        email: userTempData.email,
+        username: userTempData.username,
+        hashedPassword: userTempData.hashedPassword,
+        salt: userTempData.salt,
+        cert: true,
+      });
+
+      const { accessToken, refreshToken } = await generateToken(
+        {
+          email: userTempData.email,
+          username: userTempData.username,
+        },
+        false,
+      );
+
+      await userTemps.deleteOneByVerifyCode(code);
+
+      res
+        .cookie("accessToken", accessToken, cookieOptions)
+        .cookie("refreshToken", refreshToken, cookieOptions)
+        .json({
+          state: true,
+          message: "Login success.",
+          data: { username: userTempData.username },
+        });
+    } else throw new Error("No Userdata.");
+  } catch (err) {
     res.status(400).json({ state: false, message: err.message });
   }
 });
@@ -130,9 +212,61 @@ router.patch(
   },
 );
 
+router.post("/find/password", async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const userData = await users.findOneByEmail(email);
+
+    if (userData.length) {
+      const verifyCode = await generateVerifyCode(email);
+
+      await expireAuths.create({
+        email,
+        verifyCode,
+      });
+
+      sendFindMail(email, verifyCode);
+
+      res.json({ state: true, message: "Request Success." });
+    } else throw new Error("No join info.");
+  } catch (err) {
+    res.status(400).json({ state: false, message: err.message });
+  }
+});
+
+router.get("/find/password/:code", async (req, res) => {
+  const { code } = req.params;
+
+  try {
+    const expireAuthData = (await expireAuths.findOneByVerifyCode(code))[0];
+
+    res.json({ state: true, email: expireAuthData.email });
+  } catch (err) {
+    res.status(400).json({ state: false, message: err.message });
+  }
+});
+
+router.patch("/find/password", async (req, res) => {
+  const { newPassword, code } = req.body;
+
+  try {
+    const expireAuthData = (await expireAuths.findOneByVerifyCode(code))[0];
+    const encryptedPassword = await encryptPassword(newPassword);
+
+    if (expireAuthData) {
+      await users.updateByEmail(expireAuthData.email, encryptedPassword);
+      await expireAuths.deleteOneByVerifyCode(code);
+
+      res.json({ state: true, message: "Password change success." });
+    } else throw new Error("Expired Code.");
+  } catch (err) {
+    res.status(400).json({ state: false, message: err.message });
+  }
+});
+
 router.patch("/username", checkAuthorization, async (req, res) => {
   const { username, userId } = req.body;
-
   try {
     await users.updateByUserId(userId, { username });
 
