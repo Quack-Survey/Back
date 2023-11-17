@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, uinque: true },
     hashedPassword: { type: String, required: true },
     salt: { type: String, required: true },
+    cert: { type: Boolean, required: true, default: false },
   },
   {
     timestamps: true,
@@ -39,8 +40,16 @@ userSchema.statics.updateByUserId = function (userid, payload) {
   return this.updateOne({ _id: userid }, payload);
 };
 
+userSchema.statics.updateByEmail = function (email, payload) {
+  return this.updateOne({ email }, payload);
+};
+
 userSchema.statics.deleteByUserId = function (userid) {
   return this.deleteMany({ _id: userid });
+};
+
+userSchema.statics.deleteByEmail = function (email) {
+  return this.deleteMany({ email });
 };
 
 module.exports = mongoose.model("User", userSchema);
