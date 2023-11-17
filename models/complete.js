@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-mongoose.set("useFindAndModify", false);
 
 const completeSchema = new mongoose.Schema(
   {
@@ -8,12 +7,6 @@ const completeSchema = new mongoose.Schema(
       required: true,
       ref: "Template",
     },
-    state: {
-      type: Number,
-      enum: [0, 1],
-      required: true,
-      default: 0,
-    },
     responses: [
       {
         formId: { type: mongoose.Schema.Types, required: true, ref: "Form" },
@@ -21,7 +14,7 @@ const completeSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true },
+  { versionKey: false, timestamps: true },
 );
 
 completeSchema.statics.create = function (data) {
@@ -30,26 +23,16 @@ completeSchema.statics.create = function (data) {
   return completeData.save();
 };
 
-completeSchema.statics.findAllWithOptions = function (options) {
-  return this.find(options).populate({
-    path: "responses",
-    populate: {
-      path: "formId",
-      select: "title description",
-    },
-  });
-};
-
-completeSchema.statics.findOneById = function (id) {
-  return this.findById(id);
-};
-
-completeSchema.statics.updateById = function (id, data) {
-  return this.findByIdAndUpdate(id, { state: 1, ...data }, { new: true });
+completeSchema.statics.findAllByTemplateId = function ({ templateId }) {
+  return this.find({ templateId });
 };
 
 completeSchema.statics.deleteById = function (id) {
   return this.findByIdAndDelete(id);
+};
+
+completeSchema.statics.deleteManyByTemplateId = function (templateId) {
+  return this.deleteMany({ templateId });
 };
 
 module.exports = mongoose.model("Complete", completeSchema);
