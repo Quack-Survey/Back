@@ -9,7 +9,9 @@ const completeSchema = new mongoose.Schema(
     },
     responses: [
       {
-        formId: { type: mongoose.Schema.Types, required: true, ref: "Form" },
+        _id: false,
+        order: { type: Number, required: true },
+        title: { type: String },
         response: [String],
       },
     ],
