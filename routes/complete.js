@@ -71,7 +71,6 @@ router.post("/", async (req, res) => {
 
   try {
     if (!templateId || !req.body) throw new Error("Have No Body | templateId");
-    console.log(req.body);
     await complete.create({
       templateId,
       responses: [...req.body],
