@@ -10,6 +10,8 @@ const completeSchema = new mongoose.Schema(
     responses: [
       {
         _id: false,
+        type: { type: String, required: true },
+        question: { type: Array, default: [""] },
         order: { type: Number, required: true },
         title: { type: String },
         response: [String],
