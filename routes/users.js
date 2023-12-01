@@ -140,14 +140,16 @@ router.get("/verify/:code", async (req, res) => {
 
       await userTemps.deleteOneByVerifyCode(code);
 
-      res
-        .cookie("accessToken", accessToken, cookieOptions)
-        .cookie("refreshToken", refreshToken, cookieOptions)
-        .json({
-          state: true,
-          message: "Login success.",
-          data: { username: userTempData.username },
-        });
+      res.json({
+        state: true,
+        message: "Login success.",
+        data: {
+          email: userTempData.email,
+          username: userTempData.username,
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+        },
+      });
     } else throw new Error("No Userdata.");
   } catch (err) {
     res.status(400).json({ state: false, message: err.message });
@@ -168,14 +170,16 @@ router.post("/login", checkUserData, async (req, res) => {
       false,
     );
 
-    res
-      .cookie("accessToken", accessToken, cookieOptions)
-      .cookie("refreshToken", refreshToken, cookieOptions)
-      .json({
-        state: true,
-        message: "Login success.",
-        data: { username: userData.username },
-      });
+    res.json({
+      state: true,
+      message: "Login success.",
+      data: {
+        email: userData.email,
+        username: userData.username,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      },
+    });
   } catch (err) {
     res.status(400).json({ state: false, message: err.message });
   }
